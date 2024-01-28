@@ -1,0 +1,17 @@
+<%= turbo_frame_tag "task_list_#{task_list.id}" do %>
+  <div class="flex justify-between border-2 border-handwrite border-black mt-5 p-3">
+    <%= task_list.name %>
+    <div class="flex gap-2">
+      <%= link_to "Editar",
+                  edit_task_list_path(task_list.id),
+                  data: { turbo_stream: true },
+                  class: "border-2 border-handwrite border-black p-2"
+      %>
+      <%= button_to "Remover",
+                    task_list_path(task_list.id),
+                    method: :delete,
+                    class: "border-2 border-handwrite border-black p-2"
+      %>
+    </div>
+  </div>
+<% end %>

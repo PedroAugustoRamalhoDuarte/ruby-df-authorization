@@ -1,0 +1,23 @@
+<div class="container px-4 mx-auto pt-26">
+  <div class="flex justify-between">
+    <h1 class="text-3xl font-bold underline">
+      Minhas Listas de Tarefas
+    </h1>
+
+
+    <%= link_to "Nova tarefa",
+                new_task_list_path,
+                data: { turbo_stream: true },
+                class: "border-2 border-handwrite border-black p-2"
+    %>
+  </div>
+
+  <%= turbo_frame_tag "new_task_list" do %>
+  <% end %>
+
+  <%= turbo_frame_tag "task_lists" do %>
+    <% @task_lists.each do |task_list| %>
+      <%= render task_list, task_list: task_list %>
+    <% end %>
+  <% end %>
+</div>
