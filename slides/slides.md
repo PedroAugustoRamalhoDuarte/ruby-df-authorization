@@ -16,7 +16,7 @@ mdc: true
 
 # Segurança em Primeiro Lugar
 
-Como construir a camada de autorização para sua aplicação Rails
+## Como construir a camada de autorização para sua aplicação Rails
 
 ---
 layout: image
@@ -138,7 +138,7 @@ image: ./images/dbdiagram.png
 layout: center
 ---
 
-```ruby {4-9|10-17|18-29}{at:0}
+```ruby {4-9|10-17|18-29|}{at:0}
 # Sem utilizar o action policy
 class TaskListsController < ApplicationController
   before_action :set_task_list, only: [:show]
@@ -221,7 +221,6 @@ layout: center
 Nessa TaskList o meu usuário pode executar tal ação?
 
 ```ruby
-
 class TaskListPolicy < ApplicationPolicy
   def index?
     true
@@ -273,7 +272,6 @@ layout:
 ---
 
 ```ruby {monaco-diff}
-
 class TaskListsController < ApplicationController
   before_action :set_task_list, only: [:show]
 
@@ -302,7 +300,6 @@ class TaskListsController < ApplicationController
 end
 
 ~~~
-
 class TaskListsController < ApplicationController
   before_action :set_task_list, only: [:show]
   before_action -> { authorize! @task_list, with: TaskListPolicy }
@@ -328,8 +325,7 @@ end
 layout: center
 ---
 
-```ruby {|3|6}
-
+```ruby {3|6|}
 class TaskListsController < ApplicationController
   before_action :set_task_list, only: [:show]
   before_action -> { authorize! @task_list, with: TaskListPolicy }
