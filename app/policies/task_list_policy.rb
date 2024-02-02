@@ -3,8 +3,7 @@ class TaskListPolicy < ApplicationPolicy
     next relation if user.admin?
 
     relation.left_outer_joins(:user_task_lists)
-            .where(user_id: user.id)
-            .or(relation.left_outer_joins(:user_task_lists).where(user_task_lists: { user_id: user.id }))
+            .where('task_lists.user_id = ? OR user_task_lists.user_id = ?', user.id, user.id)
 
   end
 

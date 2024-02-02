@@ -4,9 +4,9 @@ class TaskListsController < ApplicationController
 
   def index
     # Without action_policy
-    # @task_lists = TaskList.joins(:user_task_lists)
-    #                        .where(user_id: current_user.id)
-    #                        .where(user_task_lists: { user_id: current_user.id })
+    # @task_lists = current_user.admin? ? Task.all :
+    #                 TaskList.left_outer_joins(:user_task_lists)
+    #                         .where('task_lists.user_id = ? OR user_task_lists.user_id = ?', user.id, user.id)
     @task_lists = authorized_scope(TaskList.all)
   end
 
@@ -20,16 +20,17 @@ class TaskListsController < ApplicationController
 
   def show
     # Without action_policy
-    # if @task_list.user_task_list.user_id != current_user.id or @task_list.user_task_list.user_id != current_user.id
-    #  unauthorized
+    # if !current_user.admin? and @task_list.user_id != current_user.id and !@task_list.users.includes?(current_user)
+    #   unauthorized
     # end
     @tasks = @task_list.tasks
   end
 
   def create
-    unless current_user.task_lists.count < current_user.plan.task_list_limit
-      unauthorized(message: "Você chegou no limite de lista de tarefas do seu plano")
-    end
+    # Without action policy
+    # if !current_user.admin? and current_user.task_lists.count >= current_user.plan.task_list_limit
+    #   unauthorized(message: "Você chegou no limite de lista de tarefas do seu plano")
+    # end
     @task_list = TaskList.create!(task_list_params)
   rescue StandardError => e
     flash[:error] = e.full_message

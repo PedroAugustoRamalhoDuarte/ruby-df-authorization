@@ -1,6 +1,6 @@
 ---
 theme: seriph
-background: ./images/background.png
+background: ./images/rubydf-security.png
 class: text-center
 lineNumbers: false
 info: |
@@ -44,6 +44,11 @@ layout: center
 
 ## Como conceder e verificar acesso de um usuário dos nossos sistema?
 
+---
+layout: section
+---
+
+# Por que é tão importante para a segurança das aplicações?
 ---
 layout: image
 
@@ -133,16 +138,6 @@ image: ./images/dbdiagram.png
 layout: center
 ---
 
-# Resumo para Autorização
-
-- Dado esse recurso meu usuário pode executar tal ação?
-
-- Quais dados dentre esses recursos meu usuário tem acesso?
-
----
-layout: center
----
-
 ```ruby {4-9|10-17|18-29}{at:0}
 # Sem utilizar o action policy
 class TaskListsController < ApplicationController
@@ -155,14 +150,14 @@ class TaskListsController < ApplicationController
   end
 
   def show
-    if !current_user.admin? and (@task_list.user_id != current_user.id or !@task_list.users.includes?(current_user))
+    if !current_user.admin? and @task_list.user_id != current_user.id and !@task_list.users.includes?(current_user)
       unauthorized
     end
     @tasks = @task_list.tasks
   end
 
   def create
-    unless current_user.task_lists.count < current_user.plan.task_list_limit
+    if !current_user.admin? and current_user.task_lists.count >= current_user.plan.task_list_limit
       unauthorized(message: "Você chegou no limite de lista de tarefas do seu plano")
     end
     @task_list = TaskList.create!(task_list_params)
@@ -172,6 +167,22 @@ class TaskListsController < ApplicationController
   end
 end
 ```
+
+---
+layout: section
+---
+
+# Como refatorar com o Action Policy?
+
+---
+layout: center
+---
+
+# Resumo para Autorização
+
+- Quais dados dentre esses recursos meu usuário tem acesso? (Scopes)
+
+- Dado esse recurso meu usuário pode executar tal ação? (Rules)
 
 ---
 layout: section
@@ -238,6 +249,7 @@ layout: center
 Quais TaskList meu usuário tem acesso?
 
 ```ruby
+
 class TaskListPolicy < ApplicationPolicy
   # ...
 
@@ -261,23 +273,25 @@ layout:
 ---
 
 ```ruby {monaco-diff}
+
 class TaskListsController < ApplicationController
   before_action :set_task_list, only: [:show]
 
   def index
-    @task_lists = TaskList.left_outer_joins(:user_task_lists)
-                          .where('task_lists.user_id = ? OR user_task_lists.user_id = ?', user.id, user.id)
+    @task_lists = current_user.admin? ? Task.all :
+                    TaskList.left_outer_joins(:user_task_lists)
+                            .where('task_lists.user_id = ? OR user_task_lists.user_id = ?', user.id, user.id)
   end
 
   def show
-    if @task_list.user_task_list.user_id != current_user.id or !@task_list.users.includes?(current_user)
+    if !current_user.admin? and @task_list.user_id != current_user.id and !@task_list.users.includes?(current_user)
       unauthorized
     end
     @tasks = @task_list.tasks
   end
 
   def create
-    unless current_user.task_lists.count < current_user.plan.task_list_limit
+    if !current_user.admin? and current_user.task_lists.count >= current_user.plan.task_list_limit
       unauthorized(message: "Você chegou no limite de lista de tarefas do seu plano")
     end
     @task_list = TaskList.create!(task_list_params)
@@ -288,6 +302,7 @@ class TaskListsController < ApplicationController
 end
 
 ~~~
+
 class TaskListsController < ApplicationController
   before_action :set_task_list, only: [:show]
   before_action -> { authorize! @task_list, with: TaskListPolicy }
@@ -314,6 +329,7 @@ layout: center
 ---
 
 ```ruby {|3|6}
+
 class TaskListsController < ApplicationController
   before_action :set_task_list, only: [:show]
   before_action -> { authorize! @task_list, with: TaskListPolicy }
@@ -418,3 +434,24 @@ describe "GET /task_lists" do
   end
 end
 ```
+
+---
+layout: image-left
+
+image: ./images/background.png
+---
+
+<div class="flex text-center h-full flex-col m-auto justify-center">
+<h1>Obrigado!</h1>
+
+Pedro Augusto Ramalho Duarte
+
+<div class="abs-br m-6 flex gap-2">
+  <a href="https://github.com/PedroAugustoRamalhoDuarte" target="_blank" alt="GitHub" title="Open in GitHub"
+    class="text-xl slidev-icon-btn opacity-50 !border-none !hover:text-white">
+    <carbon-logo-github />
+  </a>
+</div>
+</div>
+
+
